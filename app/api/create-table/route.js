@@ -9,61 +9,7 @@ const pool = new Pool({
   ssl: false // Set to true if your local setup requires SSL
 });
 
-// For Pages Router
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
 
-  const client = await pool.connect();
-  
-  try {
-    // Create table
-    const createTableQuery = `
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-    `;
-    
-    await client.query(createTableQuery);
-    console.log('Table created successfully');
-
-    // Insert a row
-    const insertQuery = `
-      INSERT INTO users (name, email) 
-      VALUES ($1, $2) 
-      RETURNING *;
-    `;
-    
-    const { name, email } = req.body;
-    const result = await client.query(insertQuery, [
-      name || 'John Doe', 
-      email || 'john.doe@example.com'
-    ]);
-
-    res.status(200).json({
-      success: true,
-      message: 'Table created and row inserted successfully',
-      data: result.rows[0]
-    });
-
-  } catch (error) {
-    console.error('Database error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Database operation failed',
-      details: error.message
-    });
-  } finally {
-    client.release();
-  }
-}
-
-// For App Router (alternative implementation)
-/*
 export async function POST(request) {
   const client = await pool.connect();
   
@@ -112,4 +58,3 @@ export async function POST(request) {
     client.release();
   }
 }
-*/
