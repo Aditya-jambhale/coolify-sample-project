@@ -1,4 +1,4 @@
-import CreateTableForm from '../components/CreateTableForm';
+import CreateTableForm from './components/CreateFormTable';
 
 export default function Home() {
   return (
